@@ -1,39 +1,75 @@
-import Foundation
-
-// Extension for Collection protocol conformance
 extension HeterogeneousBox: Collection {
     public typealias Index = Int
     public typealias Element = Any
-    
+
     public var startIndex: Index {
-        return 0
+        0
     }
-    
+
     public var endIndex: Index {
-        return count
+
+        count
     }
-    
+
     public func index(after i: Index) -> Index {
-        return i + 1
+
+        i + 1
     }
-    
-    // No need to reimplement subscript as it's already defined in the base implementation
-    
-    // Additional helpful methods that work well with Collection
-    
+
+    /// Creates one type-erased snapshot for iteration.
+    public func makeIterator() -> IndexingIterator<[Any]> {
+        array.makeIterator()
+    }
+
     public func map<T>(_ transform: (Element) throws -> T) rethrows -> [T] {
-        return try array.map(transform)
+        var result: [T] = []
+        result.reserveCapacity(count)
+        for element in repeat each value {
+            result.append(try transform(element))
+        }
+        return result
     }
-    
+
     public func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T] {
-        return try array.compactMap(transform)
+        var result: [T] = []
+        for element in repeat each value {
+            if let transformed = try transform(element) {
+                result.append(transformed)
+            }
+        }
+        return result
     }
-    
+
     public func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> [Element] {
-        return try array.filter(isIncluded)
+        var result: [Element] = []
+        for element in repeat each value {
+            if try isIncluded(element) {
+                result.append(element)
+            }
+        }
+        return result
     }
-    
+
     public func first(where predicate: (Element) throws -> Bool) rethrows -> Element? {
-        return try array.first(where: predicate)
+        for element in repeat each value {
+            if try predicate(element) {
+                return element as Any
+            }
+        }
+        return nil
+    }
+
+    public func allSatisfy(_ predicate: (Element) throws -> Bool) rethrows -> Bool {
+        for element in repeat each value {
+            guard try predicate(element) else { return false }
+        }
+        return true
+    }
+
+    public func contains(where predicate: (Element) throws -> Bool) rethrows -> Bool {
+        for element in repeat each value {
+            if try predicate(element) { return true }
+        }
+        return false
     }
 }
