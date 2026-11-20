@@ -20,23 +20,23 @@ flowchart LR
     S["String"] --> T
     I["Int"] --> T
     B["Bool"] --> T
-    T["Tuple&lt;String, Int, Bool&gt;"] --> M["members: (String, Int, Bool)"]
+    T["Tuple#lt;String, Int, Bool#gt;"] --> M["members: (String, Int, Bool)"]
 ```
 
 `mapEach` takes one closure per member. Each closure receives its member's type and chooses the output type at that position.
 
 ```mermaid
 flowchart LR
-    subgraph Input["Tuple&lt;Int, String&gt;"]
+    subgraph Input["Tuple#lt;Int, String#gt;"]
         A1["42"]
-        A2["&quot;pending&quot;"]
+        A2["#quot;pending#quot;"]
     end
-    subgraph Output["Tuple&lt;String, Int&gt;"]
-        B1["&quot;#42&quot;"]
+    subgraph Output["Tuple#lt;String, Int#gt;"]
+        B1["#quot;#42#quot;"]
         B2["7"]
     end
-    A1 -- "{ &quot;#\($0)&quot; }" --> B1
-    A2 -- "{ $0.count }" --> B2
+    A1 -->|Add a # prefix| B1
+    A2 -->|Count characters| B2
 ```
 
 `concurrentMapEach` runs the transforms in child tasks and returns the results in position order, whatever order the tasks finish in.
@@ -119,17 +119,26 @@ targets: [
 ]
 ```
 
-TupleKit requires Swift 6.4.2 and iOS 17 or macOS 14. Swift 6.2 rejects nonescaping
-callback packs for single-member tuples; the minimum preserves those public APIs.
+Swift introduced parameter packs and variadic generic types in [Swift 5.9](https://www.swift.org/blog/swift-5.9-released/) and added [pack iteration](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0408-pack-iteration.md) in Swift 6.0. TupleKit requires **Swift 6.4.2**: the public single-member nonescaping callback checks pass on 6.4.2 but fail on 6.2.4.
+
+| Platform | Minimum deployment target |
+| --- | --- |
+| macOS | 14 |
+| iOS and iPadOS | 17 |
+| tvOS | 17 |
+| watchOS | 10 |
+| visionOS | 1 |
+
+SwiftPM uses the iOS platform declaration and SDK for iPadOS.
 
 ### Binary installation
 
-Each [GitHub release](https://github.com/brunogama/TupleKit/releases) includes
-XCFramework ZIPs for both libraries and a checksum-pinned `Package.binary.swift`.
+The release workflow publishes XCFramework ZIPs for both libraries and a
+checksum-pinned `Package.binary.swift` as [GitHub release assets](https://github.com/brunogama/TupleKit/releases).
 Download the manifest, save it as `Package.swift` in a local directory named
-`TupleKit`, and add that directory as a local package in Xcode. Both products
-support macOS, iOS devices, and iOS Simulator. The normal Git dependency above
-still builds from source.
+`TupleKit`, and add that directory as a local package in Xcode. The current
+release builder includes macOS and device and simulator slices for iOS (including
+iPadOS), tvOS, watchOS, and visionOS. The Git dependency above builds from source.
 
 ---
 
