@@ -1,0 +1,13 @@
+# Operator policy. Inherits the root policy.
+# Operators that work on any type, such as |> and >>>, have no type to own them,
+# so they cannot be static members.
+
+parent_config: ../../../.swiftlint.yml
+
+disabled_rules:
+  - static_operator
+
+included:
+  - .
+
+allow_zero_lintable_files: false

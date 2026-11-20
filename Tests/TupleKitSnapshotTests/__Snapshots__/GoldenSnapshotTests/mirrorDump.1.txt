@@ -1,0 +1,9 @@
+▿ (4 elements)
+  - .0: 42
+  - .1: "ready"
+  - .2: nil
+  ▿ .3: (2 elements)
+    - .0: true
+    ▿ .1: 2 elements
+      - 1
+      - 2

@@ -4,7 +4,7 @@
 	"lineLength": 120,
 	"tabWidth": 8,
 	"indentation": {
-		"spaces": 4
+		"spaces": 2
 	},
 	"respectsExistingLineBreaks": true,
 	"lineBreakBeforeControlFlowKeywords": true,

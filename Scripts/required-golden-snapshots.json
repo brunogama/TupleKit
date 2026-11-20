@@ -1,0 +1,9 @@
+{
+  "caseIterableOrder": ["caseIterableOrder.1.txt"],
+  "concatenation": ["concatenation.1.txt"],
+  "elementwiseArithmetic": ["elementwiseArithmetic.1.txt"],
+  "jsonEncoding": ["jsonEncoding.1.json"],
+  "mirrorDump": ["mirrorDump.1.txt"],
+  "rawValues": ["rawValues.1.txt"],
+  "textualRepresentations": ["textualRepresentations.1.txt"]
+}

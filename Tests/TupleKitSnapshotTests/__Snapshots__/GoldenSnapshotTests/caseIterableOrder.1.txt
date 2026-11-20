@@ -1,0 +1,8 @@
+Tuple(small, light, small)
+Tuple(small, light, large)
+Tuple(small, dark, small)
+Tuple(small, dark, large)
+Tuple(large, light, small)
+Tuple(large, light, large)
+Tuple(large, dark, small)
+Tuple(large, dark, large)

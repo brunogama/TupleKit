@@ -1,0 +1,42 @@
+name: Conventional Commits
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test the commit tooling
+        run: python3 -m unittest Scripts/test_conventional_commits.py
+
+      - name: Check pull request commits
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 Scripts/conventional-commits.py lint "$BASE_SHA..$HEAD_SHA"
+
+      # A squash merge uses the pull request title as the commit subject.
+      - name: Check pull request title
+        if: github.event_name == 'pull_request'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: python3 Scripts/conventional-commits.py lint --message "$TITLE"
+
+      - name: Check pushed commits
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: python3 Scripts/conventional-commits.py lint "$BEFORE..$AFTER"

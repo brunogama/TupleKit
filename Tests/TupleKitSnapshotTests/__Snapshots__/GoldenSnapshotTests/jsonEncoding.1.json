@@ -1,0 +1,14 @@
+[
+  42,
+  "ready",
+  null,
+  [
+    true,
+    false
+  ],
+  "large",
+  [
+    "nested",
+    1
+  ]
+]

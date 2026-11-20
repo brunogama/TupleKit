@@ -1,0 +1,61 @@
+name: Release
+
+# Swift includes the reusable quality workflow, so all gates must pass on the same commit.
+on:
+  workflow_run:
+    workflows: [Swift]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      # A newer push to main gets its own run, which releases these commits too.
+      - name: Skip when main has moved
+        id: current
+        env:
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$TESTED_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "main moved past $TESTED_SHA; the newer run releases instead."
+          fi
+
+      - name: Compute the version and changelog
+        id: version
+        if: steps.current.outputs.current == 'true'
+        run: python3 Scripts/conventional-commits.py release --changelog CHANGELOG.md --notes "$RUNNER_TEMP/notes.md"
+
+      - name: Commit the changelog and push the tag
+        if: steps.version.outputs.released == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore(release): $TAG [skip ci]"
+          git tag -a "$TAG" -m "$TAG"
+          git push --atomic origin HEAD:main "$TAG"
+
+      - name: Publish the GitHub release
+        if: steps.version.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag

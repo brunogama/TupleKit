@@ -1,0 +1,3 @@
+rawValues:          Tuple<String, String> { "small" (String), "dark" (String) }
+init(rawValues:):   Optional(Tuple<Size, Tone> { large (Size), light (Tone) })
+unknown raw value:  nil

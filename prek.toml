@@ -1,0 +1,182 @@
+# Git hooks for TupleKit, managed by prek (https://prek.j178.dev).
+#
+#   pre-commit  Fast checks on the staged files.
+#   commit-msg  The message must follow Conventional Commits, as CI requires.
+#   pre-push    Strict lint, tests, required golden snapshots, compiler contracts, and docs examples.
+#   CI          The authoritative full-scope gate.
+#
+# Install once per clone:  prek install
+# Run everything now:      prek run --all-files --hook-stage pre-push
+#:schema https://www.schemastore.org/prek.json
+
+default_install_hook_types = ["pre-commit", "commit-msg", "pre-push"]
+
+# Generated or binary content that the text fixers must not rewrite.
+exclude = '^(\.swiftpm/|\.vscode/|Tests/.*/__Snapshots__/|.*\.(png|jpg|jpeg)$)'
+
+[[repos]]
+repo = "builtin"
+
+[[repos.hooks]]
+id = "trailing-whitespace"
+
+[[repos.hooks]]
+id = "end-of-file-fixer"
+
+[[repos.hooks]]
+id = "mixed-line-ending"
+args = ["--fix=lf"]
+
+[[repos.hooks]]
+id = "check-merge-conflict"
+
+[[repos.hooks]]
+id = "check-added-large-files"
+args = ["--maxkb=1024"]
+
+# The Linux CI job checks out on a case-sensitive file system.
+[[repos.hooks]]
+id = "check-case-conflict"
+
+[[repos.hooks]]
+id = "check-yaml"
+
+[[repos.hooks]]
+id = "check-toml"
+
+[[repos.hooks]]
+id = "check-json"
+
+[[repos.hooks]]
+id = "check-executables-have-shebangs"
+
+[[repos.hooks]]
+id = "check-shebang-scripts-are-executable"
+
+[[repos.hooks]]
+id = "detect-private-key"
+
+# Releases come from merged pull requests, so work happens on branches.
+[[repos.hooks]]
+id = "no-commit-to-branch"
+args = ["--branch", "main"]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "swift-format"
+name = "swift format (staged Swift files)"
+language = "system"
+entry = "bash Scripts/swift-style format"
+files = '^(Sources|Benchmarks|Tests)/'
+types = ["swift"]
+stages = ["pre-commit"]
+require_serial = true
+
+[[repos.hooks]]
+id = "concatenation-is-generated"
+name = "Tuple+Concatenation.swift matches its generator"
+language = "system"
+entry = "python3 Scripts/generate-concatenation.py --check"
+files = '^(Scripts/generate-concatenation\.py|Sources/TupleKit/Extension/Tuple\+Concatenation\.swift)$'
+pass_filenames = false
+stages = ["pre-commit"]
+
+[[repos.hooks]]
+id = "commit-tooling-tests"
+name = "Repository tooling tests"
+language = "system"
+entry = "python3 -m unittest Scripts/test_conventional_commits.py Scripts/test_check_golden_snapshots.py"
+files = '^Scripts/((conventional-commits|test_conventional_commits|check-golden-snapshots|test_check_golden_snapshots)\.py|required-golden-snapshots\.json)$'
+pass_filenames = false
+stages = ["pre-commit"]
+
+[[repos.hooks]]
+id = "conventional-commit-message"
+name = "Conventional Commits message"
+language = "system"
+entry = "python3 Scripts/conventional-commits.py lint --file"
+stages = ["commit-msg"]
+
+[[repos.hooks]]
+id = "swift-style"
+name = "swift-style check (format + SwiftLint, strict)"
+language = "system"
+entry = "bash Scripts/swift-style check"
+files = '^(Sources|Benchmarks|Tests)/'
+types = ["swift"]
+stages = ["pre-push", "manual"]
+require_serial = true
+
+[[repos.hooks]]
+id = "swift-test"
+name = "swift test"
+language = "system"
+entry = "env SNAPSHOT_TESTING_RECORD=never swift test"
+files = '^(Package\.swift|Sources/|Tests/)'
+pass_filenames = false
+stages = ["pre-push", "manual"]
+require_serial = true
+
+[[repos.hooks]]
+id = "golden-snapshots"
+name = "Required golden snapshot tests and fixtures"
+language = "system"
+entry = "python3 Scripts/check-golden-snapshots.py"
+pass_filenames = false
+# The text fixers exclude generated fixtures globally. Audit even on fixture-only pushes.
+always_run = true
+stages = ["pre-push"]
+require_serial = true
+
+[[repos.hooks]]
+id = "compiler-contracts"
+name = "compiler contracts and known compiler bugs"
+language = "system"
+entry = "Scripts/check-compiler-contracts.sh"
+files = '^(Package\.swift|Sources/|Tests/(NegativeTypeChecks|KnownCompilerBugs)/|Scripts/check-compiler-contracts\.sh)'
+pass_filenames = false
+stages = ["pre-push", "manual"]
+require_serial = true
+
+[[repos.hooks]]
+id = "doc-snippets"
+name = "documentation examples compile and run"
+language = "system"
+entry = "python3 Scripts/check-doc-snippets.py --run"
+files = '^(Package\.swift|README\.md|Sources/|Scripts/check-doc-snippets\.py)'
+pass_filenames = false
+stages = ["pre-push", "manual"]
+require_serial = true
+
+# Slow checks, run on demand and in CI:  prek run --all-files --hook-stage manual
+[[repos.hooks]]
+id = "thread-sanitizer"
+name = "swift test under Thread Sanitizer"
+language = "system"
+entry = "env SNAPSHOT_TESTING_RECORD=never swift test --sanitize=thread"
+pass_filenames = false
+always_run = true
+stages = ["manual"]
+require_serial = true
+
+[[repos.hooks]]
+id = "address-sanitizer"
+name = "swift test under Address Sanitizer"
+language = "system"
+entry = "env SNAPSHOT_TESTING_RECORD=never swift test --sanitize=address"
+pass_filenames = false
+always_run = true
+stages = ["manual"]
+require_serial = true
+
+[[repos.hooks]]
+id = "coverage"
+name = "line coverage of the library sources"
+language = "system"
+entry = "bash -c 'SNAPSHOT_TESTING_RECORD=never swift test --enable-code-coverage && python3 Scripts/check-coverage.py --minimum 96'"
+pass_filenames = false
+always_run = true
+stages = ["manual"]
+require_serial = true
