@@ -20,23 +20,23 @@ flowchart LR
     S["String"] --> T
     I["Int"] --> T
     B["Bool"] --> T
-    T["Tuple&lt;String, Int, Bool&gt;"] --> M["members: (String, Int, Bool)"]
+    T["Tuple#lt;String, Int, Bool#gt;"] --> M["members: (String, Int, Bool)"]
 ```
 
 `mapEach` takes one closure per member. Each closure receives its member's type and chooses the output type at that position.
 
 ```mermaid
 flowchart LR
-    subgraph Input["Tuple&lt;Int, String&gt;"]
+    subgraph Input["Tuple#lt;Int, String#gt;"]
         A1["42"]
-        A2["&quot;pending&quot;"]
+        A2["#quot;pending#quot;"]
     end
-    subgraph Output["Tuple&lt;String, Int&gt;"]
-        B1["&quot;#42&quot;"]
+    subgraph Output["Tuple#lt;String, Int#gt;"]
+        B1["#quot;#42#quot;"]
         B2["7"]
     end
-    A1 -- "{ &quot;#\($0)&quot; }" --> B1
-    A2 -- "{ $0.count }" --> B2
+    A1 -->|Add a # prefix| B1
+    A2 -->|Count characters| B2
 ```
 
 `concurrentMapEach` runs the transforms in child tasks and returns the results in position order, whatever order the tasks finish in.
