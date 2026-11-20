@@ -37,7 +37,22 @@ A release happens automatically after the Swift workflow passes on `main`. The R
 
 A `Release-As: X.Y.Z` footer sets the version explicitly. It must be greater than the last tag.
 
-The workflow prepends the release to `CHANGELOG.md`, commits it to `main`, pushes the tag, and publishes a GitHub release with the same notes. `CHANGELOG.md` is generated, so don't edit it by hand.
+The workflow builds both XCFramework ZIPs and generates `Package.binary.swift`
+with checksums before it pushes an automatic release tag. It then commits the
+notes to `CHANGELOG.md` and publishes the GitHub release with all three assets.
+Don't edit the generated `CHANGELOG.md` by hand.
+
+Pushing a `vX.Y.Z` tag also builds from that tag and publishes the assets. Only
+push a release tag for a tested commit. To retry a tag whose release failed,
+run the Release workflow manually with that tag. If the release contains only
+part of the binary asset set, resolve the partial upload before retrying. The
+workflow does not overwrite ZIPs or a manifest that consumers may already use.
+
+To build and inspect the assets locally from the checked-out commit on macOS:
+
+```sh
+bash Scripts/build-binary-release.sh v1.0.0 brunogama/TupleKit "$(mktemp -d)"
+```
 
 To preview the next release locally:
 

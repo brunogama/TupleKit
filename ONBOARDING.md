@@ -226,7 +226,11 @@ python3 -m unittest discover -s Scripts -p 'test_*.py'
 
 The [quality workflow](.github/workflows/swift-quality.yml) shows the clean compiler-log procedure for `Scripts/swift-style-analyze`. For local sanitizer and style commands, see [`prek.toml`](prek.toml); Linux CI disables ASan leak detection because of XCTest runtime leaks. See [Testing](#7-testing) for coverage.
 
-The [Release workflow](.github/workflows/release.yml) only considers successful Swift workflow runs triggered by a push to `main`, skips runs whose tested commit is no longer the tip of `main`, and publishes only if the commits warrant a release. See [CONTRIBUTING.md](CONTRIBUTING.md#releases). Do not edit the generated `CHANGELOG.md` by hand.
+The [Release workflow](.github/workflows/release.yml) can publish automatically
+when the Swift workflow passes on the current tip of `main` and the commits
+warrant a release. A push of an explicit `vX.Y.Z` tag also builds and publishes
+binary assets for that tag. See [CONTRIBUTING.md](CONTRIBUTING.md#releases) for
+local builds and retries. Do not edit the generated `CHANGELOG.md` by hand.
 
 ---
 

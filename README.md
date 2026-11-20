@@ -122,6 +122,15 @@ targets: [
 TupleKit requires Swift 6.4.2 and iOS 17 or macOS 14. Swift 6.2 rejects nonescaping
 callback packs for single-member tuples; the minimum preserves those public APIs.
 
+### Binary installation
+
+Each [GitHub release](https://github.com/brunogama/TupleKit/releases) includes
+XCFramework ZIPs for both libraries and a checksum-pinned `Package.binary.swift`.
+Download the manifest, save it as `Package.swift` in a local directory named
+`TupleKit`, and add that directory as a local package in Xcode. Both products
+support macOS, iOS devices, and iOS Simulator. The normal Git dependency above
+still builds from source.
+
 ---
 
 ## Learn more
